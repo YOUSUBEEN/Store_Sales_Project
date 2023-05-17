@@ -15,17 +15,27 @@ from sklearn.model_selection import train_test_split
 @st.cache_data
 def eda_features_date(train, test, transactions, stores, oil, holidays):
     """
-    eda_app 에서 데이터 전처리 한 과정을 반환하는 함수
+    Perform data preprocessing steps for EDA (Exploratory Data Analysis) in the eda_app.
 
-    :param train:
-    :param test:
-    :param transactions:
-    :param stores:
-    :param oil:
-    :param holidays:
-    :return: train, test, transactions, stores, oil, holidays, eda_app.Feature_Engineering_Holidays(holidays, train, test, stores)
+    Args:
+        train (pd.DataFrame): Training data.
+        test (pd.DataFrame): Test data.
+        transactions (pd.DataFrame): Transaction data.
+        stores (pd.DataFrame): Store data.
+        oil (pd.DataFrame): Oil data.
+        holidays (pd.DataFrame): Holiday data.
+
+    Returns:
+        tuple: A tuple containing the preprocessed dataframes:
+            train (pd.DataFrame): Preprocessed training data.
+            test (pd.DataFrame): Preprocessed test data.
+            transactions (pd.DataFrame): Preprocessed transaction data.
+            stores (pd.DataFrame): Preprocessed store data.
+            oil (pd.DataFrame): Preprocessed oil data.
+            holidays (pd.DataFrame): Preprocessed holiday data.
+            d (pd.DataFrame): Feature-engineered holiday data.
+
     """
-
     train["date"] = pd.to_datetime(train.date)
     test["date"] = pd.to_datetime(test.date)
     transactions["date"] = pd.to_datetime(transactions.date)
@@ -61,7 +71,30 @@ def eda_features_date(train, test, transactions, stores, oil, holidays):
 
 def create_date_features(df):
     """
-    date 정보를 여러 개로 나눠서 패턴을 파악하기 위한 데이터 피쳐
+        Creates additional date-related features from a DataFrame column named "date".
+
+        Args:
+            df (pandas.DataFrame): The DataFrame containing the "date" column.
+
+        Returns:
+            pandas.DataFrame: The DataFrame with added date-related features.
+
+        Features Added:
+            - month: The month of the date (integer).
+            - day_of_month: The day of the month (integer).
+            - day_of_year: The day of the year (integer).
+            - week_of_month: The week of the month (integer).
+            - day_of_week: The day of the week (integer, where Monday is 1 and Sunday is 7).
+            - year: The year (integer).
+            - is_wknd: Whether the date is a weekend (1 for weekend, 0 for weekday).
+            - quarter: The quarter of the year (integer).
+            - is_month_start: Whether the date is the start of the month (1 for start, 0 otherwise).
+            - is_month_end: Whether the date is the end of the month (1 for end, 0 otherwise).
+            - is_quarter_start: Whether the date is the start of the quarter (1 for start, 0 otherwise).
+            - is_quarter_end: Whether the date is the end of the quarter (1 for end, 0 otherwise).
+            - is_year_start: Whether the date is the start of the year (1 for start, 0 otherwise).
+            - is_year_end: Whether the date is the end of the year (1 for end, 0 otherwise).
+            - season: The season of the year (0 for winter, 1 for spring, 2 for summer, 3 for fall).
     """
     df["month"] = df.date.dt.month.astype("int8")
     df["day_of_month"] = df.date.dt.day.astype("int8")
@@ -88,7 +121,20 @@ def create_date_features(df):
 
 def ewm_features(dataframe, alphas, lags):
     """
-    지수 평균 이동 반환 함수
+    Calculates exponential weighted moving averages (EWMA) and returns the modified DataFrame.
+
+    Args:
+        dataframe (pandas.DataFrame): The DataFrame containing the data.
+        alphas (list): A list of alpha values for EWMA calculation.
+        lags (list): A list of lag values for shifting the data.
+
+    Returns:
+        pandas.DataFrame: The DataFrame with added EWMA features.
+
+    Features Added:
+        - sales_ewm_alpha_{alpha}_lag_{lag}: The exponential weighted moving average of the "sales" column
+          for each combination of "store_nbr" and "family" columns, with the specified alpha and lag values.
+
     """
     dataframe = dataframe.copy()
     for alpha in alphas:
@@ -99,9 +145,21 @@ def ewm_features(dataframe, alphas, lags):
     return dataframe
 
 def plot_acf_pacf(a,acf_pacf_data):
-    '''
-    family별 acf / pacf plot
-    '''
+    """
+    Plots ACF (Auto Correlation Function) and PACF (Partial Auto Correlation Function) for a specific family.
+
+    Args:
+        a (pandas.DataFrame): The DataFrame containing the data.
+        acf_pacf_data (str): The family for which ACF and PACF plots will be generated.
+
+    Returns:
+        None
+
+    Plots:
+        - ACF plot: Auto Correlation Function plot for the specified family.
+        - PACF plot: Partial Auto Correlation Function plot for the specified family.
+
+    """
     try:
         fig, ax = plt.subplots(1, 2, figsize=(15, 4))
         temp = a[(a.family == acf_pacf_data)]
@@ -114,8 +172,18 @@ def plot_acf_pacf(a,acf_pacf_data):
 
 def fig_average_sales(a):
     """
-    연도에 따라 판매 평균을 비교하기 위한 그래프
-    파라메터 a 값에 따라 보여주는 연도가 달라진다.
+    Plots a graph comparing the average sales across years.
+
+    Args:
+        a (pandas.DataFrame): The DataFrame containing the data.
+
+    Returns:
+        None
+
+    Plots:
+        - Line graph: Average sales comparison across years, with the x-axis representing the day of the year,
+          the y-axis representing the sales, and different colors representing different years.
+
     """
     fig = px.line(a, x="day_of_year", y="sales", color="year")
     fig.update_layout(
@@ -127,7 +195,20 @@ def fig_average_sales(a):
 
 def fig_SMA_graph(a, store_num ,family_name):
     """
-    단순이동평균을 보여주는 그래프
+    Plots a graph showing the Simple Moving Average (SMA) for a specific family.
+
+    Args:
+        a (pandas.DataFrame): The DataFrame containing the data.
+        store_num (str): The store number.
+        family_name (str): The family name for which SMA graph will be generated.
+
+    Returns:
+        None
+
+    Plots:
+        - Line graphs: Simple Moving Average (SMA) comparison for the specified family,
+          with different SMAs plotted against the actual sales data.
+
     """
     # for i in a.family.unique():
     fig, ax = plt.subplots(2, 4, figsize=(20, 10))
@@ -150,22 +231,62 @@ def fig_SMA_graph(a, store_num ,family_name):
 
 def fig_EMA_graph(a, store_num, family_name):
     """
-    지수평균이동을 보여주는 그래프
+    Plots a graph showing the Exponential Moving Average (EMA) for a specific family.
+
+    Args:
+        a (pandas.DataFrame): The DataFrame containing the data.
+        store_num (str): The store number.
+        family_name (str): The family name for which EMA graph will be generated.
+
+    Returns:
+        None
+
+    Plots:
+        - Line graph: Exponential Moving Average (EMA) comparison for the specified family,
+          with EMA plotted against the actual sales data.
+
     """
     fig, ax = plt.subplots(1,1, figsize=(20,10))
     a[(a.store_nbr == store_num) & (a.family == family_name)].set_index("date")[["sales", "sales_ewm_alpha_095_lag_16"]].plot(title=f"{store_num} - {family_name}", ax=ax)
     st.pyplot(fig)
 
 def grouped(df, key, freq, col):
-    """ GROUP DATA WITH CERTAIN FREQUENCY """
+    """
+    Groups data based on a certain frequency.
+
+    Args:
+        df (pandas.DataFrame): The DataFrame containing the data.
+        key (str or list): The column(s) to use as the grouping key(s).
+        freq (str or pandas offset alias): The frequency at which to group the data.
+        col (str): The column for which to calculate the mean.
+
+    Returns:
+        pandas.DataFrame: The grouped DataFrame with the mean value of the specified column.
+
+    """
     df_grouped = df.groupby([pd.Grouper(key=key, freq=freq)]).agg(mean = (col, 'mean'))
     df_grouped = df_grouped.reset_index()
     return df_grouped
 
 def predict_seasonality(df, key, freq, col, ax1, title1):
-    '''
-    계절성 예측 함수
-    '''
+    """
+    Predicts seasonality in data using a linear regression model with Fourier terms.
+
+    Args:
+        df (pandas.DataFrame): The DataFrame containing the data.
+        key (str or list): The column(s) to use as the grouping key(s) for grouping the data.
+        freq (str or pandas offset alias): The frequency at which to group the data.
+        col (str): The column containing the target variable for which seasonality will be predicted.
+        ax1 (matplotlib.axes.Axes): The matplotlib axes to use for plotting.
+        title1 (str): The title for the plot.
+
+    Returns:
+        None
+
+    Plots:
+        - Line plot: Original mean values, predicted seasonal values, and seasonal forecast.
+
+    """
     fourier = CalendarFourier(freq="A", order=10)  # 10 sin/cos pairs for "A"nnual seasonality
     df_grouped = grouped(df, key, freq, col)
     df_grouped['date'] = pd.to_datetime(df_grouped['date'], format="%Y-%m-%d")
@@ -200,9 +321,20 @@ def predict_seasonality(df, key, freq, col, ax1, title1):
     _ = ax1.legend()
 
 def Seasonal_Forecast(train, trans):
-    '''
-    거래량 및 판매액 계절성 예측 그래프
-    '''
+    """
+    Plots seasonal forecast graphs for transaction volume and sales.
+
+    Args:
+        train (pandas.DataFrame): The DataFrame containing the sales data.
+        trans (pandas.DataFrame): The DataFrame containing the transaction data.
+
+    Returns:
+        None
+
+    Plots:
+        - Line plots: Seasonal forecast for transaction volume and sales.
+
+    """
     fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(30,8))
     predict_seasonality(trans, 'date', 'W', 'transactions', axes[0], "Transactions Seasonal Forecast")
     predict_seasonality(train, 'date', 'W', 'sales', axes[1], "Sales Seasonal Forecast")
@@ -211,9 +343,26 @@ def Seasonal_Forecast(train, trans):
 
 
 def plot_deterministic_process(df, key, freq, col, ax1, title1, ax2, title2):
-    '''
-    Trend 예측 함수
-    '''
+    """
+    Plots trend forecast graphs.
+
+    Args:
+        df (pandas.DataFrame): The DataFrame containing the data.
+        key (str): The column name used for grouping.
+        freq (str): The frequency of the data (e.g., 'D' for daily, 'M' for monthly).
+        col (str): The column for which trend will be predicted.
+        ax1 (matplotlib.axes.Axes): The first subplot axes.
+        title1 (str): The title for the first subplot.
+        ax2 (matplotlib.axes.Axes): The second subplot axes.
+        title2 (str): The title for the second subplot.
+
+    Returns:
+        None
+
+    Plots:
+        - Line plots: Trend forecast and predicted trend.
+
+    """
     df_grouped = grouped(df, key, freq, col)
     df_grouped['date'] = pd.to_datetime(df_grouped['date'], format="%Y-%m-%d")
     dp = DeterministicProcess(index=df_grouped['date'], constant=True, order=1, drop=True)
@@ -246,9 +395,20 @@ def plot_deterministic_process(df, key, freq, col, ax1, title1, ax2, title2):
 
 
 def Trend_Forecasting(train, trans):
-    '''
-    Transactins, Sales 월별 추세 예측
-    '''
+    """
+    Plots trend forecasting graphs for transactions and sales.
+
+    Args:
+        train (pandas.DataFrame): The DataFrame containing sales data.
+        trans (pandas.DataFrame): The DataFrame containing transactions data.
+
+    Returns:
+        None
+
+    Plots:
+        - Line plots: Linear trend forecast and predicted trend for transactions and sales.
+
+    """
     fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(30,12))
     plot_deterministic_process(trans, 'date', 'W', 'transactions',
                                axes[0,0], "Transactions Linear Trend",
@@ -258,10 +418,50 @@ def Trend_Forecasting(train, trans):
                                axes[1,1], "Sales Linear Trend Forecast")
     st.pyplot(fig)
 
+
+def make_lags(ts, lags):
+    """
+       Generate lagged values for prediction models.
+
+       Parameters:
+           ts (pandas.Series): Time series data.
+           lags (int): Number of lagged values to generate.
+
+       Returns:
+           pandas.DataFrame: DataFrame with lagged values.
+
+       Example:
+           >>> ts = pd.Series([1, 2, 3, 4, 5])
+           >>> make_lags(ts, 2)
+              y_lag_1  y_lag_2
+           0      NaN      NaN
+           1      1.0      NaN
+           2      2.0      1.0
+           3      3.0      2.0
+           4      4.0      3.0
+    """
+    return pd.concat(
+        {
+            f'y_lag_{i}': ts.shift(i)
+            for i in range(1, lags + 1)
+        },
+        axis=1)
+
 def lags_forcasting(train, family):
-    '''
-    train데이터를 validation데이터로 분할하여 회귀 모델 적용 예측
-    '''
+    """
+    Applies regression model for forecasting by splitting the train data into validation data.
+
+    Args:
+        train (pandas.DataFrame): The DataFrame containing the train data.
+        family (str): The family name for which the forecasting is performed.
+
+    Returns:
+        None
+
+    Modifies:
+        - Updates the 'sales_deseasoned' column in the 'train' DataFrame.
+
+    """
     store_sales = train.copy()
     store_sales['date'] = store_sales.date.dt.to_period('D')
     store_sales = store_sales.set_index(['store_nbr', 'family', 'date']).sort_index()
@@ -294,17 +494,6 @@ def lags_forcasting(train, family):
     y_deseason = y - model.predict(X_time)
     y_deseason.name = 'sales_deseasoned'
 
-    def make_lags(ts, lags):
-        '''
-        예측 모델을 위한 지연값 생성
-        '''
-        return pd.concat(
-            {
-                f'y_lag_{i}': ts.shift(i)
-                for i in range(1, lags + 1)
-            },
-            axis=1)
-
     X = make_lags(y_deseason, lags=4)
     X = X.fillna(0.0)
     y = y_deseason.copy()
@@ -327,7 +516,12 @@ def lags_forcasting(train, family):
 
 
 def stat_app():
+    """
+        Statistical Analysis App
 
+        This function displays various statistical analyses and visualizations based on the loaded data.
+        It includes correlation analysis, ACF/PACF plots, forecasting techniques, and moving average calculations.
+    """
     st.write('---')
     # load_data & features_data
     train, test, transactions, stores, oil, holidays = utils.load_data()

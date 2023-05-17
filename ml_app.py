@@ -12,6 +12,16 @@ import plotly.express as px
 import utils
 
 def feautreImportancePlot(model, X_train):
+    """
+        Generate a bar chart of feature importances for the given model.
+
+        Parameters:
+            - model (object): The trained model with a `feature_importances_` attribute.
+            - X_train (DataFrame): The training data used to train the model.
+
+        Returns:
+            - fig (plotly.graph_objects.Figure): The generated bar chart figure.
+    """
     # Get the best model from the search
     model = model.best_estimator_
 
@@ -36,6 +46,20 @@ def feautreImportancePlot(model, X_train):
 
 @st.cache_resource
 def run_model(data, max_depth, min_samples_leaf):
+    """
+        Train a random forest regression model with the given parameters and evaluate its performance.
+
+        Parameters:
+            - data (DataFrame): The input data containing both features and target variable.
+            - max_depth (tuple): A tuple specifying the range of maximum depth values to search during hyperparameter tuning.
+            - min_samples_leaf (int): The minimum number of samples required to be at a leaf node.
+
+        Returns:
+            - model (RandomizedSearchCV): The trained model after hyperparameter tuning.
+            - X_test (DataFrame): The test data features.
+            - y_test (Series): The test data target variable.
+            - fig (plotly.graph_objects.Figure): The feature importance plot for the model.
+    """
     # 특성과 타겟 분리
 
     y = data['sales']
@@ -57,6 +81,19 @@ def run_model(data, max_depth, min_samples_leaf):
     return model, X_test, y_test, fig
 
 def prediction(model, X_test, y_test):
+    """
+        Make predictions using the trained model and evaluate its performance.
+
+        Parameters:
+            - model (RandomizedSearchCV): The trained model.
+            - X_test (DataFrame): The test data features.
+            - y_test (Series): The test data target variable.
+
+        Returns:
+            - y_test_pred (array-like): The predicted target variable values.
+            - test_mae (float): The mean absolute error between the predicted and actual target variable values.
+            - r2 (float): The coefficient of determination (R-squared) score between the predicted and actual target variable values.
+    """
     # 예측
     y_test_pred = model.predict(X_test)
 
@@ -67,6 +104,16 @@ def prediction(model, X_test, y_test):
     return y_test_pred, test_mae, r2
 
 def prediction_plot(X_test, y_test, y_test_pred, test_mae, r2):
+    """
+        Create a scatter plot to visualize the predicted and actual target variable values.
+
+        Parameters:
+            - X_test (DataFrame): The test data features.
+            - y_test (Series): The actual target variable values.
+            - y_test_pred (array-like): The predicted target variable values.
+            - test_mae (float): The mean absolute error between the predicted and actual target variable values.
+            - r2 (float): The coefficient of determination (R-squared) score between the predicted and actual target variable values.
+    """
     # 그래프 그리기
     fig = go.Figure()
     fig.add_trace(
@@ -86,6 +133,12 @@ def prediction_plot(X_test, y_test, y_test_pred, test_mae, r2):
     st.plotly_chart(fig)
 
 def ml_app():
+    """
+        Streamlit app for the machine learning section.
+
+        The app allows the user to select hyperparameters, load the necessary data, run the model,
+        make predictions, and visualize the prediction results.
+    """
     # Hyperparameters
     max_depth = st.select_slider("Select max depth", options=[i for i in range(2, 30)], value=(5, 10), key='ml1')
     min_samples_leaf = st.slider("Minimum samples leaf", min_value=2, max_value=20, key='ml2')

@@ -11,6 +11,36 @@ import utils
 import plotly.graph_objects as go
 
 def one_hot_encoder(df, nan_as_category=True):
+    """
+    Perform one-hot encoding on categorical columns in a pandas DataFrame.
+
+    Args:
+        df (pandas DataFrame): The input DataFrame.
+        nan_as_category (bool, optional): Whether to treat NaN values as a separate category. Defaults to True.
+
+    Returns:
+        encoded_df (pandas DataFrame): The DataFrame with one-hot encoded categorical columns.
+        encoded_columns (list): The list of column names in the encoded DataFrame.
+
+    Example:
+        import pandas as pd
+
+        data = {'Color': ['Red', 'Blue', 'Green', 'Red', 'Blue'],
+                'Size': ['S', 'M', 'L', 'M', 'S'],
+                'Price': [10, 15, 20, 12, 18]}
+        df = pd.DataFrame(data)
+
+        encoded_df, encoded_columns = one_hot_encoder(df)
+        print(encoded_df)
+        # Output:
+        #    Price  Color_Blue  Color_Green  Color_Red  Size_L  Size_M  Size_S
+        # 0     10           0            0          1       0       0       1
+        # 1     15           1            0          0       0       1       0
+        # 2     20           0            1          0       1       0       0
+        # 3     12           0            0          1       0       1       0
+        # 4     18           1            0          0       0       0       1
+    """
+
     original_columns = list(df.columns)
     categorical_columns = df.select_dtypes(["category", "object"]).columns.tolist()
     df = pd.get_dummies(df, columns=categorical_columns, dummy_na=nan_as_category)
@@ -19,6 +49,31 @@ def one_hot_encoder(df, nan_as_category=True):
     return df, df.columns.tolist()
 
 def AB_Test(dataframe, group, target):
+    """
+        Perform an A/B test to compare two groups in a dataframe.
+
+        Args:
+            dataframe (pandas DataFrame): The input dataframe containing the data.
+            group (str): The column name representing the group membership (A/B).
+            target (str): The column name representing the target variable to compare between the groups.
+
+        Returns:
+            result (pandas DataFrame): A summary of the A/B test results, including hypothesis testing, p-values,
+                                       group statistics, and additional information.
+
+        Example:
+            import pandas as pd
+
+            data = {'Group': ['A', 'A', 'B', 'B', 'A', 'B'],
+                    'Value': [10, 12, 8, 9, 11, 14]}
+            df = pd.DataFrame(data)
+
+            result = AB_Test(df, 'Group', 'Value')
+            print(result)
+            # Output:
+            #   Feature     Test Type AB Hypothesis   p-value                  Comment  GroupA_mean  GroupB_mean  GroupA_median  GroupB_median
+            # 0   Group  Non-Parametric   Reject H0  0.323810  A/B groups are similar    11.000000     10.333333           11.0            9.0
+    """
     # Split A/B
     groupA = dataframe[dataframe[group]==1][target]
     groupB = dataframe[dataframe[group]==0][target]
@@ -81,7 +136,24 @@ def AB_Test(dataframe, group, target):
 
 def fig_Transactions_TotalSales_Correlation(temp, transactions):
     """
-    Transactions 데이터와 Total Sales 간의 상관관계 패턴 파악 하는 그래프
+    Generate a graph to visualize the correlation pattern between Transactions data and Total Sales.
+
+    Args:
+        temp (pandas DataFrame): The DataFrame containing the combined data of Total Sales and Transactions.
+        transactions (pandas DataFrame): The DataFrame containing the Transactions data.
+
+    Returns:
+        None
+
+    Example:
+        import pandas as pd
+        import plotly.express as px
+        import matplotlib.pyplot as plt
+        import streamlit as st
+
+        # Assume 'temp' and 'transactions' DataFrames are defined
+
+        fig_Transactions_TotalSales_Correlation(temp, transactions)
     """
     # temp = pd.merge(train.groupby(["date", "store_nbr"]).sales.sum().reset_index(), transactions, how="left")
     st.write("Spearman Correlation between Total Sales and Transactions: {:,.4f}".format(temp.corr("spearman").sales.loc["transactions"]))
@@ -96,7 +168,23 @@ def fig_Transactions_TotalSales_Correlation(temp, transactions):
 
 def fig_Transactions_ym_patten1(transactions):
     """
-    Transactions 데이터의 연도별, 월별 패턴 파악 하는 그래프
+    Generate a graph to visualize the pattern of Transactions data by year and month.
+
+    Args:
+        transactions (pandas DataFrame): The DataFrame containing the Transactions data.
+
+    Returns:
+        None
+
+    Example:
+        import pandas as pd
+        import plotly.express as px
+        import matplotlib.pyplot as plt
+        import streamlit as st
+
+        # Assume 'transactions' DataFrame is defined
+
+        fig_Transactions_ym_patten1(transactions)
     """
     a = transactions.copy()
     a["year"] = a.date.dt.year
@@ -109,7 +197,23 @@ def fig_Transactions_ym_patten1(transactions):
 
 def fig_Transactions_ym_patten2(transactions):
     """
-    Transactions 데이터의 연도별, 월별 평균 매출 패턴 파악 하는 그래프
+    Generate a graph to visualize the pattern of average sales by year and month in the Transactions data.
+
+    Args:
+        transactions (pandas DataFrame): The DataFrame containing the Transactions data.
+
+    Returns:
+        None
+
+    Example:
+        import pandas as pd
+        import plotly.express as px
+        import matplotlib.pyplot as plt
+        import streamlit as st
+
+        # Assume 'transactions' DataFrame is defined
+
+        fig_Transactions_ym_patten2(transactions)
     """
     a = transactions.set_index("date").resample("M").transactions.mean().reset_index()
     a["year"] = a.date.dt.year
@@ -121,7 +225,23 @@ def fig_Transactions_ym_patten2(transactions):
 
 def fig_Transactions_Sales_Correlation(temp):
     """
-    Transactions 데이터와 Sales 간의 상관관계 패턴 파악 하는 그래프
+    Generate a graph to visualize the correlation pattern between Transactions data and Sales.
+
+    Args:
+        temp (pandas DataFrame): The DataFrame containing the combined data of Sales and Transactions.
+
+    Returns:
+        None
+
+    Example:
+        import pandas as pd
+        import plotly.express as px
+        import matplotlib.pyplot as plt
+        import streamlit as st
+
+        # Assume 'temp' DataFrame is defined
+
+        fig_Transactions_Sales_Correlation(temp)
     """
     # temp = pd.merge(train.groupby(["date", "store_nbr"]).sales.sum().reset_index(), transactions, how="left")
 
@@ -135,7 +255,23 @@ def fig_Transactions_Sales_Correlation(temp):
 
 def fig_Transactions_ydw_patten(transactions):
     """
-    Transactions 연도별, 요일별 패턴 파악 하는 그래프
+    Generate a graph to visualize the pattern of Transactions data by year and day of the week.
+
+    Args:
+        transactions (pandas DataFrame): The DataFrame containing the Transactions data.
+
+    Returns:
+        None
+
+    Example:
+        import pandas as pd
+        import plotly.express as px
+        import matplotlib.pyplot as plt
+        import streamlit as st
+
+        # Assume 'transactions' DataFrame is defined
+
+        fig_Transactions_ydw_patten(transactions)
     """
     a = transactions.copy()
     a["year"] = a.date.dt.year
@@ -152,7 +288,23 @@ def fig_Transactions_ydw_patten(transactions):
 
 def fig_OilPrice(oil):
     """
-    Oil Price 누락 값 추가 하는 그래프
+    Generate a graph to visualize the Oil Price data with added missing values.
+
+    Args:
+        oil (pandas DataFrame): The DataFrame containing the Oil Price data.
+
+    Returns:
+        None
+
+    Example:
+        import pandas as pd
+        import plotly.express as px
+        import matplotlib.pyplot as plt
+        import streamlit as st
+
+        # Assume 'oil' DataFrame is defined
+
+        fig_OilPrice(oil)
     """
     # oil = oil.set_index("date").dcoilwtico.resample("D").sum().reset_index()
     # oil["dcoilwtico"] = np.where(oil["dcoilwtico"] == 0, np.nan, oil["dcoilwtico"])
@@ -170,7 +322,23 @@ def fig_OilPrice(oil):
 
 def fig_OilPrice_Sales_Transactions_patten(temp, oil):
     """
-    Oil Price 와 Sales / Oil Price 와 Transactions 패턴 파악 하는 그래프
+    Generate graphs to visualize the patterns between Oil Price and Sales, and Oil Price and Transactions.
+
+    Args:
+        temp (pandas DataFrame): The DataFrame containing the combined data of Sales and Transactions.
+        oil (pandas DataFrame): The DataFrame containing the Oil Price data.
+
+    Returns:
+        None
+
+    Example:
+        import pandas as pd
+        import matplotlib.pyplot as plt
+        import streamlit as st
+
+        # Assume 'temp' and 'oil' DataFrames are defined
+
+        fig_OilPrice_Sales_Transactions_patten(temp, oil)
     """
     # temp = pd.merge(train.groupby(["date", "store_nbr"]).sales.sum().reset_index(), transactions, how="left")
     temp = pd.merge(temp, oil, how="left")
@@ -186,7 +354,23 @@ def fig_OilPrice_Sales_Transactions_patten(temp, oil):
 
 def fig_OilPrice_family_patten(train, oil):
     """
-    Oil Price 와 제품군 별 Sales 패턴 파악 하는 그래프
+    Generate graphs to visualize the patterns between Oil Price and Sales for each product family.
+
+    Args:
+        train (pandas DataFrame): The DataFrame containing the training data with the "date" and "family" columns.
+        oil (pandas DataFrame): The DataFrame containing the Oil Price data.
+
+    Returns:
+        None
+
+    Example:
+        import pandas as pd
+        import matplotlib.pyplot as plt
+        import streamlit as st
+
+        # Assume 'train' and 'oil' DataFrames are defined
+
+        fig_OilPrice_family_patten(train, oil)
     """
     a = pd.merge(train.groupby(["date", "family"]).sales.sum().reset_index(), oil.drop("dcoilwtico", axis=1), how="left")
     c = a.groupby("family").corr("spearman").reset_index()
@@ -229,7 +413,23 @@ def fig_OilPrice_family_patten(train, oil):
 
 def fig_Train_sales_Correlation(train):
     """
-    각 매장별 Sales 에 대한 상관 관계 그래프
+    Generate a correlation graph for Sales among different stores.
+
+    Args:
+        train (pandas DataFrame): The DataFrame containing the training data with the "store_nbr" and "sales" columns.
+
+    Returns:
+        None
+
+    Example:
+        import pandas as pd
+        import matplotlib.pyplot as plt
+        import seaborn as sns
+        import streamlit as st
+
+        # Assume 'train' DataFrame is defined
+
+        fig_Train_sales_Correlation(train)
     """
     a = train[["store_nbr", "sales"]]
     a["ind"] = 1
@@ -244,7 +444,23 @@ def fig_Train_sales_Correlation(train):
 
 def fig_Train_store_TotalSales_patten(train):
     """
-    각 매장 별 Total Sales 패턴 파악
+    Generate a graph to observe the Total Sales pattern for each store.
+
+    Args:
+        train (pandas DataFrame): The DataFrame containing the training data with the "date", "store_nbr", and "sales" columns.
+
+    Returns:
+        None
+
+    Example:
+        import pandas as pd
+        import plotly.express as px
+        import matplotlib.pyplot as plt
+        import streamlit as st
+
+        # Assume 'train' DataFrame is defined
+
+        fig_Train_store_TotalSales_patten(train)
     """
     a = train.set_index("date").groupby("store_nbr").resample("D").sales.sum().reset_index()
 
@@ -259,7 +475,22 @@ def fig_Train_store_TotalSales_patten(train):
 
 def fig_unsold_family(train):
     """
-    판매 되지 않는 제품 군 파악 하는 그래프
+    Generate a graph to identify the unsold product families.
+
+    Args:
+        train (pandas DataFrame): The DataFrame containing the training data with the "date", "store_nbr", "family", and "sales" columns.
+
+    Returns:
+        None
+
+    Example:
+        import pandas as pd
+        import matplotlib.pyplot as plt
+        import streamlit as st
+
+        # Assume 'train' DataFrame is defined
+
+        fig_unsold_family(train)
     """
     c = train.groupby(["family", "store_nbr"]).tail(60).groupby(["family", "store_nbr"]).sales.sum().reset_index()
 
@@ -273,7 +504,22 @@ def fig_unsold_family(train):
 
 def fig_Train_d_family_patten(train):
     """
-    일별 제품 판매 패턴 파악 그래프
+    Generate a graph to identify the daily sales pattern for each product family.
+
+    Args:
+        train (pandas DataFrame): The DataFrame containing the training data with the "date", "family", and "sales" columns.
+
+    Returns:
+        None
+
+    Example:
+        import pandas as pd
+        import plotly.express as px
+        import streamlit as st
+
+        # Assume 'train' DataFrame is defined
+
+        fig_Train_d_family_patten(train)
     """
     a = train.set_index("date").groupby("family").resample("D").sales.sum().reset_index()
 
@@ -284,7 +530,22 @@ def fig_Train_d_family_patten(train):
 
 def fig_Train_family_patten(train):
     """
-    제품별 판매 패턴 파악 그래프
+    Generate a graph to identify the sales pattern for each product family.
+
+    Args:
+        train (pandas DataFrame): The DataFrame containing the training data with the "family" and "sales" columns.
+
+    Returns:
+        None
+
+    Example:
+        import pandas as pd
+        import plotly.express as px
+        import streamlit as st
+
+        # Assume 'train' DataFrame is defined
+
+        fig_Train_family_patten(train)
     """
     a = train.groupby("family").sales.mean().sort_values(ascending=False).reset_index()
 
@@ -295,7 +556,23 @@ def fig_Train_family_patten(train):
 
 def fig_Train_Stores_patten(train, stores):
     """
-    매장 별 판매 패턴 파악 그래프
+    Generate a graph to identify the sales pattern for each store.
+
+    Args:
+        train (pandas DataFrame): The DataFrame containing the training data with the "store_nbr", "date", and "sales" columns.
+        stores (pandas DataFrame): The DataFrame containing store information with the "store_nbr" and "city" columns.
+
+    Returns:
+        None
+
+    Example:
+        import pandas as pd
+        import plotly.express as px
+        import streamlit as st
+
+        # Assume 'train' and 'stores' DataFrames are defined
+
+        fig_Train_Stores_patten(train, stores)
     """
     d = pd.merge(train, stores)
     d["store_nbr"] = d["store_nbr"].astype("int8")
@@ -308,7 +585,23 @@ def fig_Train_Stores_patten(train, stores):
 
 def Feature_Engineering_Holidays(holidays, train, test, stores):
     """
-    휴일 데이터에 대해서 전처리 하는 부분
+    Perform preprocessing on holiday data.
+
+    Args:
+        holidays (pandas DataFrame): DataFrame containing holiday data with columns: "date", "type", "description", "transferred", "locale", "locale_name".
+        train (pandas DataFrame): DataFrame containing training data with columns: "date", "store_nbr", "sales".
+        test (pandas DataFrame): DataFrame containing test data with columns: "date", "store_nbr".
+        stores (pandas DataFrame): DataFrame containing store information with columns: "store_nbr", "city", "state".
+
+    Returns:
+        pandas DataFrame: Preprocessed DataFrame with added holiday-related features.
+
+    Example:
+        import pandas as pd
+
+        # Assume 'holidays', 'train', 'test', and 'stores' DataFrames are defined
+
+        processed_data = Feature_Engineering_Holidays(holidays, train, test, stores)
     """
     ## Transferred Holidays(양도된 휴일) 처리
     tr1 = holidays[(holidays.type == "Holiday") & (holidays.transferred == True)].drop("transferred", axis=1).reset_index(drop=True)
@@ -382,7 +675,26 @@ def Feature_Engineering_Holidays(holidays, train, test, stores):
 
 def plot_stats(df, column, ax, color, angle):
     """
-    다양한 열의 통계 플롯
+    Plot statistics for a given column.
+
+    Args:
+        df (pandas DataFrame): DataFrame containing the data.
+        column (str): Name of the column to plot.
+        ax (matplotlib Axes): Axes object to plot on.
+        color (str): Color palette for the plot.
+        angle (int): Rotation angle for x-axis labels.
+
+    Returns:
+        None
+
+    Example:
+        import seaborn as sns
+        import matplotlib.pyplot as plt
+        import pandas as pd
+
+        # Assume 'df', 'column', 'ax', 'color', and 'angle' are defined
+
+        plot_stats(df, column, ax, color, angle)
     """
     ## 선택된 열의 value값 계산
     count_classes = df[column].value_counts()
@@ -393,9 +705,25 @@ def plot_stats(df, column, ax, color, angle):
         tick.set_rotation(angle)
 
 def grouped(df, key, freq, col):
-    '''
-    특정 빈도로 데이터 그룹화
-    '''
+    """
+    Group data at a specific frequency.
+
+    Args:
+        df (pandas DataFrame): DataFrame containing the data.
+        key (str): Column name to group by.
+        freq (str): Frequency at which to group the data ('D', 'W', 'M', etc.).
+        col (str): Column name to calculate the mean.
+
+    Returns:
+        pandas DataFrame: Grouped DataFrame with the mean value for the specified column.
+
+    Example:
+        import pandas as pd
+
+        # Assume 'df', 'key', 'freq', and 'col' are defined
+
+        df_grouped = grouped(df, key, freq, col)
+    """
     df_grouped = df.groupby([pd.Grouper(key=key, freq=freq)]).agg(mean=(col, 'mean'))
     ## pd.Grouper = 그룹화의 기준이 될 시간 간격('freq')과 그룹화할 기준이 될 열('key')을 설정
     ## freq = 'D','W','M'과 같은 문자열로 나타냄
@@ -403,7 +731,25 @@ def grouped(df, key, freq, col):
     return df_grouped
 
 def add_time(df, key, freq, col):
-    """ ADD COLUMN 'TIME' TO DF """
+    """
+    Add a 'time' column to the DataFrame.
+
+    Args:
+        df (pandas DataFrame): DataFrame to which the 'time' column will be added.
+        key (str): Column name to group by.
+        freq (str): Frequency at which to group the data ('D', 'W', 'M', etc.).
+        col (str): Column name to calculate the mean.
+
+    Returns:
+        pandas DataFrame: DataFrame with the 'time' column added.
+
+    Example:
+        import pandas as pd
+
+        # Assume 'df', 'key', 'freq', and 'col' are defined
+
+        df_with_time = add_time(df, key, freq, col)
+    """
     df_grouped = grouped(df, key, freq, col)
     df_grouped['time'] = np.arange(len(df_grouped.index))
     column_time = df_grouped.pop('time')
@@ -413,9 +759,26 @@ def add_time(df, key, freq, col):
 
 
 def add_lag(df,key,freq,col,lag):
-    '''
-    lag 추가
-    '''
+    """
+    Add lag to the DataFrame.
+
+    Args:
+        df (pandas DataFrame): DataFrame to which the lag column will be added.
+        key (str): Column name to group by.
+        freq (str): Frequency at which to group the data ('D', 'W', 'M', etc.).
+        col (str): Column name to calculate the mean.
+        lag (int): Number of periods to lag the data.
+
+    Returns:
+        pandas DataFrame: DataFrame with the lag column added.
+
+    Example:
+        import pandas as pd
+
+        # Assume 'df', 'key', 'freq', 'col', and 'lag' are defined
+
+        df_with_lag = add_lag(df, key, freq, col, lag)
+    """
     ## grouped 함수 호출
     df_grouped = grouped(df,key,freq,col)
 
@@ -425,9 +788,22 @@ def add_lag(df,key,freq,col,lag):
     return df_grouped
 
 def W_M_Sales(train):
-    '''
-    주 / 월별 판매액 함수
-    '''
+    """
+    Plot weekly and monthly sales.
+
+    Args:
+        train (pandas DataFrame): DataFrame containing the sales data.
+
+    Returns:
+        None
+
+    Example:
+        import pandas as pd
+
+        # Assume 'train' DataFrame is defined
+
+        W_M_Sales(train)
+    """
     df_grouped_train_w = add_time(train, 'date', 'W', 'sales')
     df_grouped_train_m = add_time(train, 'date', 'M', 'sales')
 
@@ -459,9 +835,22 @@ def W_M_Sales(train):
 
 
 def W_M_lag(train):
-    '''
-    월 / 주별 지연(lag) 함수
-    '''
+    """
+    Plot lagged sales for weeks and months.
+
+    Args:
+        train (pandas DataFrame): DataFrame containing the sales data.
+
+    Returns:
+        None
+
+    Example:
+        import pandas as pd
+
+        # Assume 'train' DataFrame is defined
+
+        W_M_lag(train)
+    """
     ## 주별 지연(lag)값 1 추가
     df_grouped_train_w_lag1 = add_lag(train, 'date', 'W', 'sales', 1)
     ## 월별 지연(lag)값 1 추가
@@ -487,9 +876,31 @@ def W_M_lag(train):
     st.pyplot(fig)
 
 def plot_moving_average(df,key,freq,col,window,min_periods,ax,title):
-    '''
-    이동평균플롯 함수
-    '''
+    """
+    Plot moving average.
+
+    Args:
+        df (pandas DataFrame): DataFrame containing the data.
+        key (str): Key column to group the data.
+        freq (str): Frequency for grouping ('D', 'W', 'M', etc.).
+        col (str): Column to calculate the moving average.
+        window (int): Size of the moving average window.
+        min_periods (int): Minimum number of periods required to calculate the moving average.
+        ax (matplotlib Axes): Axes object to plot the data.
+        title (str): Title of the plot.
+
+    Returns:
+        None
+
+    Example:
+        import pandas as pd
+        import matplotlib.pyplot as plt
+
+        # Assume 'df' DataFrame is defined
+        fig, ax = plt.subplots()
+        plot_moving_average(df, 'date', 'W', 'sales', 3, 2, ax, 'Moving Average Plot')
+        plt.show()
+    """
     df_grouped = grouped(df,key,freq,col)
     plot_moving_average = df_grouped['mean'].rolling(window=window, center = True, min_periods=min_periods).mean()
     # rolling = 이동평균 계산 함수
@@ -500,9 +911,22 @@ def plot_moving_average(df,key,freq,col,window,min_periods,ax,title):
 
 
 def Trend_Moving_average(train):
-    '''
-    추세 이동평균 그래프
-    '''
+    """
+    Plot trend moving average graphs.
+
+    Args:
+        train (pandas DataFrame): DataFrame containing the training data.
+
+    Returns:
+        None
+
+    Example:
+        import pandas as pd
+        import matplotlib.pyplot as plt
+
+        # Assume 'train' DataFrame is defined
+        Trend_Moving_average(train)
+    """
     fig, ax = plt.subplots(nrows=1,ncols=2, figsize=(30,8))
     # plot_moving_average(transactions, 'date','W','transactions',7,4,ax[0],'Transactions Moving Average')
     plot_moving_average(train,'date','W','sales',7,4,ax[0],'Sales Weekly-7 Moving Average')
@@ -512,6 +936,15 @@ def Trend_Moving_average(train):
 
 
 def eda_app():
+    """
+        Exploratory Data Analysis (EDA) application.
+
+        Returns:
+            None
+
+        Example:
+            eda_app()
+    """
     train, test, transactions, stores, oil, holidays = utils.load_data()
     st.write('---')
     selected_data = st.radio('SELECT DATA', ["Train", "Transactions", "Oil"])

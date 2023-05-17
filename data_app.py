@@ -9,14 +9,16 @@ import utils
 
 
 def summary(dataframe):
+    """
+       Display the dataframe, data types, and describe statistics in a Streamlit-style format.
+
+       :param dataframe: The input dataframe.
+       :return: None
+    """
     # st.set_page_config(page_title="Store Sales", page_icon=":💰:",
     #                         layout = "wide", initial_sidebar_state="expanded")
-    """
-    요약 정보를 출력하기 위한 함수
-    """
     # 화면 분할을 위한 컬럼 설정 2:1 비율
     col1, col2 = st.columns([4, 4])
-
     with col1:
         st.title("📣 Data")
         st.dataframe(dataframe, height=810, width=1200)
@@ -29,8 +31,13 @@ def summary(dataframe):
         st.dataframe(dataframe.describe(), height=350, width=650)
 
 def data_app():
+    """
+        Display data descriptions and summaries based on the selected data type.
 
+        :return: None
+    """
     train, test, transactions, stores, oil, holidays = utils.load_data()
+
     # 데이터 딕셔너리 생성
     datalist_dict = {
         "✓ Train": train,

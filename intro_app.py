@@ -5,7 +5,9 @@ import numpy as np
 import utils
 
 def intro_app():
-
+    """
+        Renders the introduction section of the app, including tabs for overview, objectives, and analysis phases.
+    """
     tab1, tab2, tab3 = st.tabs(["**소개**", "**목표**", "**분석 단계**"])
     with tab1:
         st.subheader(":white_check_mark: 대회 개요")

@@ -10,7 +10,9 @@ import ml_app
 
 
 def main():
-
+    """
+        Main function to run the Streamlit app.
+    """
     st.set_page_config(page_title="Store Sales", page_icon=":💰:",
                             layout = "wide", initial_sidebar_state="expanded")
     # Streamlit 앱 실행
