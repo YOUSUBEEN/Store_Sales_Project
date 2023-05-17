@@ -1,7 +1,7 @@
 # Kaggle Store Sales - 시계열 예측 (~ 2023.05.17)
 <br/>
 
-## [1. Streamlit 웹 서비스](https://jangsukyung-store-sales-project-main-app-ghkqjj.streamlit.app/, "Streamlit Link")<br/>
+## [1. Streamlit 웹 서비스](https://yousubeen-store-sales-project-main-app-g94fhe.streamlit.app/, "Streamlit Link")<br/>
 
 ## [2. 발표 영상](https://jangsukyung-store-sales-project-main-app-o9qgi7.streamlit.app/, "Presentation Link")<br/>
 
@@ -75,7 +75,7 @@ Store Sales 대회에서 제공하는 데이터를 사용하였습니다.<br/>
 ```
 git clone https://github.com/jangsukyung/Store-Sales-Project.git
 ```
-- 프로젝트 경로에서 가상환경 설치 후 접속합니다. (Windows 10 기준)
+- 프로젝트 경로에서 가상환경 설치 후 접속합니다.(Windows 10 기준)
 ```
 virtualenv venv
 source venv/Scripts/activate
